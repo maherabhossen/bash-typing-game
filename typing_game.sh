@@ -4,6 +4,8 @@ start_game() {
     trap "echo; echo 'Game interrupted! Returning to menu...'; return" SIGINT
     
     score=0
+    correct=0
+    total=0
     duration=10
     start_time=$SECONDS
 
@@ -17,9 +19,12 @@ start_game() {
 
         read -t 3 user_input
 
+        total=$((total + 1))
+
         if [ "$user_input" = "$random_char" ]; then
             echo "Correct!"
             score=$((score + 1))
+            correct=$((correct + 1))
         else
             echo "Wrong or Timeout!"
         fi
@@ -30,6 +35,14 @@ start_game() {
 
     echo "Time's up!"
     echo "Final Score: $score"
+
+    if [ $total -gt 0 ]; then
+        accuracy=$(( 100 * correct / total ))
+    else
+        accuracy=0
+    fi
+
+    echo "Accuracy: $accuracy%"
 }
 
 while true
