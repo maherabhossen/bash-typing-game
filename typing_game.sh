@@ -5,6 +5,8 @@ echo "===================================="
 echo "        BASH TYPING GAME"
 echo "===================================="
 echo
+echo "Welcome to the Ultimate Bash Typing Game!"
+echo
 echo "1. Start Game"
 echo "2. Exit"
 echo
