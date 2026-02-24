@@ -1,6 +1,8 @@
 #!/bin/bash
 
 start_game() {
+    trap "echo; echo 'Game interrupted! Returning to menu...'; return" SIGINT
+    
     score=0
     duration=10
     start_time=$SECONDS
