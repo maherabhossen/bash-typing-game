@@ -12,16 +12,19 @@ start_game() {
     echo "Game Started! You have $duration seconds."
     echo "----------------------------------------"
 
+    words=("apple" "train" "cloud" "keyboard" "linux" "script" "terminal" "function" "variable" "random")
+
     while [ $(($SECONDS - start_time)) -lt $duration ]
     do
-        random_char=$(tr -dc 'a-z' </dev/urandom | head -c 1)
-        echo "Type this: $random_char"
+        index=$(( RANDOM % ${#words[@]} ))
+        random_word=${words[$index]}
+        echo "Type this word: $random_word"
 
         read -t 3 user_input
 
         total=$((total + 1))
 
-        if [ "$user_input" = "$random_char" ]; then
+        if [ "$user_input" = "$random_word" ]; then
             echo "Correct!"
             score=$((score + 1))
             correct=$((correct + 1))
