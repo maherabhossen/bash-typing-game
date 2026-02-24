@@ -30,3 +30,16 @@ generate_char() {
 echo
 rand_char=$(generate_char)
 echo "Type this character: $rand_char"
+
+score=0
+
+read -p "Type the character: " user_char
+
+if [ "$user_char" == "$rand_char" ]; then
+    echo "Correct!"
+    ((score++))
+else
+    echo "Incorrect!"
+fi
+
+echo "Your score: $score"
