@@ -7,7 +7,7 @@ echo "===================================="
 echo
 echo "Welcome to the Ultimate Bash Typing Game!"
 echo
-echo "1. Start Game"
+echo "1. Start Typing Challenge"
 echo "2. Exit"
 echo
 read -p "Choose an option: " choice
