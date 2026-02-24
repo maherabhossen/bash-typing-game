@@ -30,23 +30,27 @@ start_game() {
     echo "Final Score: $score"
 }
 
-clear
-echo "===================================="
-echo "        BASH TYPING GAME"
-echo "===================================="
-echo
-echo "Welcome to the Ultimate Bash Typing Game!"
-echo
-echo "1. Start Typing Challenge"
-echo "2. Exit"
-echo
-read -p "Choose an option: " choice
+while true
+do
+    clear
+    echo "===================================="
+    echo "        BASH TYPING GAME"
+    echo "===================================="
+    echo
+    echo "1. Start Typing Challenge"
+    echo "2. Exit"
+    echo
+    read -p "Choose an option: " choice
 
-if [ "$choice" -eq 1 ]; then
-    start_game
-elif [ "$choice" -eq 2 ]; then
-    echo "Exiting..."
-    exit 0
-else
-    echo "Invalid choice."
-fi
+    if [ "$choice" -eq 1 ]; then
+        start_game
+        echo
+        read -p "Press Enter to return to menu..."
+    elif [ "$choice" -eq 2 ]; then
+        echo "Exiting..."
+        exit 0
+    else
+        echo "Invalid choice."
+        sleep 1
+    fi
+done
