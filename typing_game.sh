@@ -20,3 +20,13 @@ elif [ "$choice" -eq 2 ]; then
 else
     echo "Invalid choice."
 fi
+# Random character generator
+generate_char() {
+    letters=({a..z})
+    index=$(( RANDOM % 26 ))
+    echo "${letters[$index]}"
+}
+
+echo
+rand_char=$(generate_char)
+echo "Type this character: $rand_char"
