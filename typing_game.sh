@@ -13,11 +13,20 @@ start_game() {
     echo "----------------------------------------"
 
     words=("apple" "train" "cloud" "keyboard" "linux" "script" "terminal" "function" "variable" "random")
+    last_word=""
 
     while [ $(($SECONDS - start_time)) -lt $duration ]
     do
-        index=$(( RANDOM % ${#words[@]} ))
-        random_word=${words[$index]}
+        # Pick a new word that is NOT the same as the last one
+        while true; do
+            index=$(( RANDOM % ${#words[@]} ))
+            random_word=${words[$index]}
+            if [ "$random_word" != "$last_word" ]; then
+                break
+            fi
+        done
+        last_word=$random_word
+        
         echo "Type this word: $random_word"
 
         read -t 3 user_input
