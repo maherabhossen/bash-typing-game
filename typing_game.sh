@@ -1,5 +1,30 @@
 #!/bin/bash
 
+start_game() {
+    score=0
+
+    echo "Game Started!"
+    echo "Press Ctrl+C to stop."
+
+    while true
+    do
+        random_char=$(tr -dc 'a-z' </dev/urandom | head -c 1)
+        echo "Type this: $random_char"
+
+        read user_input
+
+        if [ "$user_input" = "$random_char" ]; then
+            echo "Correct!"
+            score=$((score + 1))
+        else
+            echo "Wrong!"
+        fi
+
+        echo "Score: $score"
+        echo "----------------------"
+    done
+}
+
 clear
 echo "===================================="
 echo "        BASH TYPING GAME"
@@ -14,6 +39,8 @@ read -p "Choose an option: " choice
 
 if [ "$choice" -eq 1 ]; then
     echo "Starting game..."
+    start_game
+    
 elif [ "$choice" -eq 2 ]; then
     echo "Exiting..."
     exit 0
