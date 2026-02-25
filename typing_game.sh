@@ -1,148 +1,155 @@
 #!/bin/bash
 
-start_game() {
-    difficulty=$1
-    if [ "$difficulty" = "easy" ]; then
-        words=("cat" "dog" "sun" "map" "pen" "tree" "book")
-    elif [ "$difficulty" = "medium" ]; then
-        words=("apple" "train" "cloud" "keyboard" "linux" "script")
-    else
-        words=("function" "variable" "terminal" "algorithm" "parameter")
+# ===============================
+# BASH TYPING GAME PRO - DIALOG
+# ===============================
+
+HIGH_SCORE_FILE="highscores.txt"
+touch "$HIGH_SCORE_FILE"
+
+# Words per difficulty
+WORDS_EASY=("cat" "dog" "sun" "map" "pen" "tree" "book")
+WORDS_MEDIUM=("apple" "train" "cloud" "keyboard" "linux" "script")
+WORDS_HARD=("function" "variable" "terminal" "algorithm" "parameter")
+
+# ===============================
+# Show Leaderboard
+# ===============================
+show_leaderboard() {
+    if [ ! -s "$HIGH_SCORE_FILE" ]; then
+        dialog --title "Leaderboard" --msgbox "No scores yet!" 10 40
+        return
     fi
-    interrupted=false
-    trap "interrupted=true" SIGINT
-    
+
+    leaderboard=$(sort -t',' -k2 -nr "$HIGH_SCORE_FILE" | head -10 | awk -F',' '{printf "%-15s Score:%-4s Acc:%-3s%% WPM:%-3s\n",$1,$2,$3,$4}')
+    dialog --title "Leaderboard - Top 10" --msgbox "$leaderboard" 20 60
+}
+
+# ===============================
+# Start Game Function
+# ===============================
+start_game() {
+    local player_name=$1
+    local difficulty=$2
+
+    case $difficulty in
+        easy) words=("${WORDS_EASY[@]}"); duration=15 ;;
+        medium) words=("${WORDS_MEDIUM[@]}"); duration=20 ;;
+        hard) words=("${WORDS_HARD[@]}"); duration=25 ;;
+    esac
+
+    # Shuffle words for no repeats
+    words_shuffled=($(printf "%s\n" "${words[@]}" | shuf))
+    word_index=0
+
     score=0
     correct=0
     total=0
     typed_words=()
-    correct_words=()
-    duration=10
+    shown_words=()
+
     start_time=$SECONDS
 
-    echo "Game Started! You have $duration seconds."
-    echo "----------------------------------------"
+    interrupted=false
 
-    last_word=""
+    # Main game loop
+    while [ $word_index -lt ${#words_shuffled[@]} ] && [ $((SECONDS - start_time)) -lt $duration ]; do
+        random_word="${words_shuffled[$word_index]}"
+        shown_words+=("$random_word")
 
-    while [ $(($SECONDS - start_time)) -lt $duration ] && [ "$interrupted" = false ]
-    do
-        # Pick a new word that is NOT the same as the last one
-        while true; do
-            index=$(( RANDOM % ${#words[@]} ))
-            random_word=${words[$index]}
-            if [ "$random_word" != "$last_word" ]; then
-                break
-            fi
-        done
-        last_word=$random_word
-        
-        echo "Type this word: $random_word"
+        # Progress gauge percentage
+        percent=$(( (SECONDS - start_time) * 100 / duration ))
+        [ $percent -gt 100 ] && percent=100
 
-        if read -t 3 user_input; then
-            total=$((total + 1))
-            typed_words+=("$user_input")
-        else
-            echo "Timeout!"
-            continue
+        # Display input box with progress gauge
+        user_input=$(dialog --title "Typing Game" \
+            --inputbox "Type this word: $random_word\nScore: $score\nTime left: $((duration-(SECONDS-start_time)))s" 10 50 2>&1 >/dev/tty)
+
+        exit_status=$?
+        if [ $exit_status -ne 0 ]; then
+            interrupted=true
+            break
         fi
+
+        typed_words+=("$user_input")
+        total=$((total+1))
 
         if [ "$user_input" = "$random_word" ]; then
-            echo "Correct!"
-            score=$((score + 1))
-            correct=$((correct + 1))
-            correct_words+=("$random_word")
-        else
-            echo "Wrong!"
+            correct=$((correct+1))
+            score=$((score+1))
         fi
 
-        echo "Score: $score"
-        echo "----------------------"
+        word_index=$((word_index+1))
     done
-    if [ "$interrupted" = true ]; then
-        echo
-        echo "Game interrupted!"
-    fi
 
-    # echo "Time's up!"
-    # echo "Final Score: $score"
-
-    # if [ $total -gt 0 ]; then
-    #     accuracy=$(( 100 * correct / total ))
-    # else
-    #     accuracy=0
-    # fi
-
-    # echo "Accuracy: $accuracy%"
-    # trap - SIGINT
-    # echo
-    # read -p "Press Enter to return to menu..."
-    echo
-    echo "===================================="
-    echo "            GAME RESULTS"
-    echo "===================================="
-    echo
-
-    echo "Total Words Typed : $total"
-    echo "Correct Words     : $correct"
-
+    # Calculate accuracy and WPM
     if [ $total -gt 0 ]; then
-        accuracy=$(( 100 * correct / total ))
+        accuracy=$((100*correct/total))
     else
         accuracy=0
     fi
 
-    echo "Accuracy          : $accuracy%"
-    echo
+    elapsed=$((SECONDS - start_time))
+    if [ $elapsed -gt 0 ]; then
+        wpm=$((correct * 60 / elapsed))
+    else
+        wpm=0
+    fi
 
-    echo "Words You Typed:"
-    printf "  %s\n" "${typed_words[@]}"
-    echo
+    # Prepare detailed results
+    result_text="Player: $player_name\nDifficulty: $difficulty\n\nTotal Words: $total\nCorrect: $correct\nAccuracy: $accuracy%\nWPM: $wpm\n\n"
+    result_text+="Detailed Results:\n------------------------------------\n"
 
-    echo "Correct Words:"
-    printf "  %s\n" "${correct_words[@]}"
-    echo
-    
-    trap - SIGINT
+    for ((i=0;i<${#typed_words[@]};i++)); do
+        result_text+="Word $((i+1))  Shown: ${shown_words[$i]}  Typed: ${typed_words[$i]}"
+        if [ "${typed_words[$i]}" = "${shown_words[$i]}" ]; then
+            result_text+="  ✅ Correct\n"
+        else
+            result_text+="  ❌ Wrong\n"
+        fi
+    done
 
-    echo
-    read -p "Press Enter to return to menu..."
+    # Show results in dialog
+    dialog --title "Game Results" --msgbox "$result_text" 25 70
+
+    # Save high score
+    echo "$player_name,$score,$accuracy,$wpm" >> "$HIGH_SCORE_FILE"
 }
 
-while true
-do
+# ===============================
+# MAIN MENU
+# ===============================
+while true; do
+    choice=$(dialog --title "BASH TYPING GAME PRO" --menu "Select an option:" 15 50 5 \
+        1 "Start Game" \
+        2 "Leaderboard" \
+        3 "Exit" 2>&1 >/dev/tty)
     clear
-    echo "===================================="
-    echo "        BASH TYPING GAME"
-    echo "===================================="
-    echo
-    echo "1. Start Typing Challenge"
-    echo "2. Exit"
-    echo
-    read -p "Choose an option: " choice
 
-    if [ "$choice" -eq 1 ]; then
-        echo "Select Difficulty:"
-        echo "1. Easy"
-        echo "2. Medium"
-        echo "3. Hard"
-
-        read -p "Choose difficulty: " level
-
-        if [ "$level" -eq 1 ]; then
-            start_game easy
-        elif [ "$level" -eq 2 ]; then
-            start_game medium
-        elif [ "$level" -eq 3 ]; then
-            start_game hard
-        else
-            echo "Invalid difficulty."
-        fi
-    elif [ "$choice" -eq 2 ]; then
-        echo "Exiting..."
-        exit 0
-    else
-        echo "Invalid choice."
-        sleep 1
-    fi
+    case $choice in
+        1)
+            player_name=$(dialog --title "Enter Name" --inputbox "Your Name:" 10 40 2>&1 >/dev/tty)
+            diff_choice=$(dialog --title "Difficulty" --menu "Select Difficulty:" 15 40 3 \
+                1 "Easy" \
+                2 "Medium" \
+                3 "Hard" 2>&1 >/dev/tty)
+            case $diff_choice in
+                1) start_game "$player_name" easy ;;
+                2) start_game "$player_name" medium ;;
+                3) start_game "$player_name" hard ;;
+            esac
+            ;;
+        2)
+            show_leaderboard
+            ;;
+        3)
+            break
+            ;;
+        *)
+            dialog --msgbox "Invalid choice" 5 30
+            ;;
+    esac
 done
+
+clear
+echo "Thanks for playing!"
