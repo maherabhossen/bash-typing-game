@@ -28,14 +28,32 @@ It uses standard Bash commands and utilities to display words, track time, and c
 ---
 
 ### 5. Requirements
-To run the game:  
-- A Linux system with Bash installed (Ubuntu, Debian, Fedora, etc.) 
 
-**Playing on other OS:**
-- **Windows:** You can run it using [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install) or Git Bash.  
-- **macOS:** The game can run directly in the terminal.  
+To run the game, the following are required:
 
-No additional libraries are needed.
+- **Linux** or **macOS** terminal with Bash (`dialog` utility installed)
+- **Windows:** Use Windows Subsystem for Linux (WSL) to run the game.  
+Git Bash may work, but WSL is recommended for full compatibility.
+
+**Install dialog if not already installed:**
+
+- Ubuntu / Debian: 
+```bash
+   sudo apt install dialog 
+  ```
+- Fedora:
+```bash
+   sudo dnf install dialog
+```
+- Arch Linux:
+```bash
+   sudo pacman -S dialog
+```
+- macOS (with Homebrew):
+```bash
+   brew install dialog
+```
+No other libraries or dependencies required.
 
 ---
 
