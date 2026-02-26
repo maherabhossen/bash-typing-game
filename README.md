@@ -1,5 +1,6 @@
-![Visitor Count](https://komarev.com/ghpvc/?username=maherabhossen&repo=bash-typing-game&color=blue)
 # Typing Game
+
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=maherabhossen.bash-typing-game)
 
 ### 1. Introduction
 **Typing Game** is an interactive game designed to help users improve their typing speed and accuracy. It provides real-time feedback, scoring, and a fun challenge for players of all levels.
