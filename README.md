@@ -1,3 +1,4 @@
+![Visitor Count](https://komarev.com/ghpvc/?username=maherabhossen&repo=bash-typing-game&color=blue)
 # Typing Game
 
 ### 1. Introduction
